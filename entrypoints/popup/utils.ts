@@ -11,6 +11,11 @@ export const getCookies = async (host: string): Promise<Cookie[]> => {
     }
     const url = new URL(host);
     const cookies = await browser.cookies.getAll({ domain: url.hostname });
+    const [plain,partitioned] = await Promise.all([
+      browser.cookies.getAll({ domain: url.hostname }),
+      browser.cookies.getAll({ partitionKey: {} }).then((arr)=>arr||[],()=>[])
+    ])
+    const cookies = [...plain,...partitioned]
     
     // 使用 Map 去重，保留最后一个出现的 cookie
     const uniqueCookies = new Map();
